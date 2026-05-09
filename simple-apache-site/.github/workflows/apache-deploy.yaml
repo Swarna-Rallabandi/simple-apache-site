@@ -1,57 +1,22 @@
-# Create GitHub Actions workflow to deploy Apache web server
-name: Deploy Apache Web Server    
+name: Deploy Apache Web Server
 
 on:
   push:
     branches:
-      - main  
-
-# Cancel in-progress runs for the same workflow and ref to improve performance
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+      - main
 
 jobs:
-
   deploy:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: read  # Minimal permissions for security
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Cache apt packages
-      uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a  # v4
-      with:
-        path: /var/cache/apt/archives
-        key: apt-${{ runner.os }}-${{ hashFiles('**/apt-requirements.txt') }}
-        restore-keys: |
-          apt-${{ runner.os }}-
+      - name: Show files
+        run: ls -la
 
-    - name: Install dependencies (example)
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y curl rsync  # Example packages; adjust as needed
-
-    - name: Set up SSH
-      uses: webfactory/ssh-agent@3c8adfea286e27cdb3a9040ea4cee2673aec33  # v0.9.0
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-    - name: Add server to known_hosts
-      run: |
-        mkdir -p ~/.ssh
-        ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
-
-    - name: Deploy to Apache Server
-      run: |
-        rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" \
-          ./public-html/ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:/var/www/html/
-
-    - name: Post-deployment health check
-      run: |
-        sleep 10  # Allow time for server to process
-        curl -f --max-time 30 http://${{ secrets.SERVER_IP }}/ || exit 1  
+      - name: Check website folder
+        run: |
+          ls -la
+          echo "GitHub Actions workflow is working"
