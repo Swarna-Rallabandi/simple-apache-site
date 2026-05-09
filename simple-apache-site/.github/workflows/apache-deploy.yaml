@@ -25,6 +25,11 @@ jobs:
 
     - name: Cache apt packages
       uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a  # v4
+      with:
+        path: /var/cache/apt/archives
+        key: apt-${{ runner.os }}-${{ hashFiles('**/apt-requirements.txt') }}
+        restore-keys: |
+          apt-${{ runner.os }}-
 
     - name: Install dependencies (example)
       run: |
